@@ -25,7 +25,7 @@ mksum <- function(sim){
 #Power on regression models at minor allele frequency = 0.5
 plot.summ <- function(summ, title){
   
-  test_names= c("LR", "tau.50", "tau.75", "tau.95", "tau.99", "QUAIL","Bartlett","Levene", "BF", "BP")
+  test_names= c("LR", "Tau.50", "Tau.75", "Tau.95", "Tau.99", "QUAIL","Bartlett","Levene", "BF", "BP")
   test_col= c("red","#2A595D","#22577A","#56C9D4","#38A3A5","#E8BB00","#C1ED8F",
               "#7A4EBF","#F289CA","#ACBF15")
   plot(summ$sdeffect,summ$pow.lreg, 
@@ -395,4 +395,43 @@ qqunif(this_model$bf_pval, main= "BF", col = test_col[8])
 qqunif(this_model$levene_pval, main= "Levene", col = test_col[9])
 qqunif(this_model$bp_pval, main= "BP", col = test_col[10])
 mtext("meffect:0 ; sdeffect:0 ; skew:no", side = 3, line= -2, outer = T, cex= 1.5,font=2)
+
+
+
+
+### Run Time ###
+sim= read.csv("../batch5/runtime/simulations_runtime_table.csv")
+trunt= read.csv("../batch5/runtime/overall_runtime.csv")
+summrunt= data.frame( "Test"= c("LR", "Tau.50", "Tau.75","Tau.95","Tau.99",
+                                "QUAIL","Bartlett","Levene","BF","BP"),
+                      "runtime"= c(sum(sim$lreg_time), sum(sim$t50_time),
+                                 sum(sim$t95_time), sum(sim$t99_time),
+                                 sum(sim$t99_time), sum(sim$quail_time),
+                                 sum(sim$bartlett_time), sum(sim$levene_time), 
+                                 sum(sim$bf_time), sum(sim$bp_time))
+                    )
+
+
+top=max(summrunt$runtime)
+bottom=min(summrunt$runtime)
+library(RColorBrewer)
+library("ggplot2")
+library("ggbreak")
+
+
+
+plot=ggplot(summrunt, aes(x= factor(Test, test_names), y= runtime/bottom, fill= Test))+ 
+  geom_bar(stat = "identity", fill=c("red","#2A595D", "#22577A", "#56C9D4", "#38A3A5", "#E8BB00",
+                                     "#C1ED8F", "#7A4EBF", "#F289CA", "#ACBF15")) + 
+  geom_text(aes(label= paste(round(runtime, digits = 4), "s", sep = ""), vjust = - 0.6)) +
+  theme(text = element_text(size = 12)) +
+  ylim(0,392) +
+  scale_y_break(c(4.7,390)) +
+  ylab("Runtime proportion of LR") +
+  xlab("Test")
+plot
+
+
+
+
 
